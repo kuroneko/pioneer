@@ -2,7 +2,10 @@ language: cpp
 compiler:
   - gcc
   - clang
-script: ./bootstrap && ./configure && make
+script: ./bootstrap && ./configure --with-thirdparty=$(pwd)/pioneer-thirdparty && make
 before_install:
+     - git clone --depth 1 git://github.com/pioneerspacesim/pioneer-thirdparty.git pioneer-thirdparty
+     - cd pioneer-thirdparty && autoconf && ./configure && make sdl2 && make sdl2_image
+
      - sudo apt-get update -qq
-     - sudo apt-get install -qq libsql2-dev libsdl2-image-dev libassimp-dev libfreetype6-dev libfreeimage-dev libglew-dev libsigc++-2.0-dev libvorbis-dev
+     - sudo apt-get install -qq mesa-common-dev libassimp-dev libfreetype6-dev libfreeimage-dev libglew-dev libsigc++-2.0-dev libvorbis-dev
