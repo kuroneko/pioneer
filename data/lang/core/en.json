@@ -1379,6 +1379,10 @@
       "description" : "",
       "message" : "Rear"
    },
+   "RELEASE_SPEED_LOCK" : {
+      "description" : "",
+      "message": "Release Speed Lock"
+   },
    "REQUEST_DOCKING_CLEARANCE" : {
       "description" : "",
       "message" : "Request docking clearance"

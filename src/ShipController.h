@@ -64,6 +64,7 @@ public:
 	void PollControls(float timeStep, const bool force_rotation_damping, int *mouseMotion);
 	bool IsMouseActive() const { return m_mouseActive; }
 	double GetSetSpeed() const { return m_setSpeed; }
+	bool IsSpeedLocked() const { return m_speedLocked; }
 	FlightControlState GetFlightControlState() const { return m_flightControlState; }
 	vector3d GetMouseDir() const { return m_mouseDir; }
 	void SetMouseForRearView(bool enable) { m_invertMouse = enable; }
@@ -83,7 +84,8 @@ public:
 	Body *GetSetSpeedTarget() const;
 	void SetCombatTarget(Body* const target, bool setSpeedTo = false);
 	void SetNavTarget(Body* const target, bool setSpeedTo = false);
-
+	void PlayerShipController::SetSpeedTarget(Body* const target);
+	
 	sigc::signal<void> onRotationDampingChanged;
 
 private:
@@ -99,9 +101,11 @@ private:
 	bool m_invertMouse; // used for rear view, *not* for invert Y-axis option (which is Pi::IsMouseYInvert)
 	bool m_mouseActive;
 	bool m_rotationDamping;
+	bool m_speedLocked; // if true, decouple m_setSpeed from the actual set speed.
 	double m_mouseX;
 	double m_mouseY;
 	double m_setSpeed;
+	double m_currentSetSpeed;
 	FlightControlState m_flightControlState;
 	float m_fovY; //for mouse acceleration adjustment
 	float m_joystickDeadzone;
@@ -111,6 +115,9 @@ private:
 	int m_setSpeedTargetIndex;
 	vector3d m_mouseDir;
 	Frame *m_lastFrame;
+
+	// control debounce
+	bool db_releaseSpeedLock;
 
 	sigc::connection m_connRotationDampingToggleKey;
 	sigc::connection m_fireMissileKey;

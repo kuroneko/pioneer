@@ -45,6 +45,7 @@ KEY_BINDING(thrustLowPower, "BindThrustLowPower", Lang::USE_LOW_THRUST, SDLK_LSH
 BINDING_GROUP(Lang::SPEED_CONTROL_MODE)
 KEY_BINDING(increaseSpeed, "BindIncreaseSpeed", Lang::INCREASE_SET_SPEED, SDLK_RETURN, 0)
 KEY_BINDING(decreaseSpeed, "BindDecreaseSpeed", Lang::DECREASE_SET_SPEED, SDLK_RSHIFT, 0)
+KEY_BINDING(releaseSpeedLock, "BindReleaseSpeedLock", Lang::RELEASE_SPEED_LOCK, 0, 0)
 
 BINDING_GROUP(Lang::SCANNER_CONTROL)
 KEY_BINDING(toggleScanMode, "BindToggleScanMode", Lang::TOGGLE_SCAN_MODE, SDLK_BACKSLASH, 0)

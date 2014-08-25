@@ -31,6 +31,8 @@ PlayerShipController::PlayerShipController() :
 	m_mouseX(0.0),
 	m_mouseY(0.0),
 	m_setSpeed(0.0),
+	m_speedLocked(false),
+	m_currentSetSpeed(0.0),
 	m_flightControlState(CONTROL_MANUAL),
 	m_lowThrustPower(0.25), // note: overridden by the default value in GameConfig.cpp (DefaultLowThrustPower setting)
 	m_mouseDir(0.0)
@@ -63,6 +65,8 @@ void PlayerShipController::Save(Serializer::Writer &wr, Space *space)
 	wr.Int32(space->GetIndexForBody(m_combatTarget));
 	wr.Int32(space->GetIndexForBody(m_navTarget));
 	wr.Int32(space->GetIndexForBody(m_setSpeedTarget));
+	wr.Double(m_currentSetSpeed);
+	wr.Bool(m_speedLocked);
 }
 
 void PlayerShipController::Load(Serializer::Reader &rd)
@@ -75,6 +79,9 @@ void PlayerShipController::Load(Serializer::Reader &rd)
 	m_combatTargetIndex = rd.Int32();
 	m_navTargetIndex = rd.Int32();
 	m_setSpeedTargetIndex = rd.Int32();
+	// record these otherwise we'll get strange happenings from flight assist when we resume saves
+	m_currentSetSpeed = rd.Double();
+	m_speedLocked = rd.Bool();
 }
 
 void PlayerShipController::PostLoadFixup(Space *space)
@@ -111,7 +118,7 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 		case CONTROL_FIXSPEED:
 			PollControls(timeStep, true, mouseMotion);
 			if (IsAnyLinearThrusterKeyDown()) break;
-			v = -m_ship->GetOrient().VectorZ() * m_setSpeed;
+			v = -m_ship->GetOrient().VectorZ() * m_currentSetSpeed;
 			if (m_setSpeedTarget) {
 				v += m_setSpeedTarget->GetVelocityRelTo(m_ship->GetFrame());
 			}
@@ -157,6 +164,8 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 			if (m_ship->GetFrame()->IsRotFrame()) SetFlightControlState(CONTROL_FIXSPEED);
 			else SetFlightControlState(CONTROL_MANUAL);
 			m_setSpeed = 0.0;
+			m_currentSetSpeed = 0.0;
+			m_speedLocked = true;
 			break;
 		default: assert(0); break;
 		}
@@ -243,7 +252,6 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 					stickySpeedKey = false;
 				}
 			}
-
 			if (!stickySpeedKey) {
 				if (KeyBindings::increaseSpeed.IsActive())
 					m_setSpeed += std::max(fabs(m_setSpeed)*0.05, 1.0);
@@ -256,6 +264,17 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 					stickySpeedKey = true;
 					m_setSpeed = 0;
 				}
+			}
+			if (KeyBindings::releaseSpeedLock.IsActive()) {
+				if (!db_releaseSpeedLock) {
+					m_speedLocked = false;
+				}
+				db_releaseSpeedLock = true;
+			} else {
+				db_releaseSpeedLock = false;
+			}
+			if (!m_speedLocked) {
+				m_currentSetSpeed = m_setSpeed;
 			}
 		}
 
@@ -337,8 +356,9 @@ bool PlayerShipController::IsAnyLinearThrusterKeyDown()
 void PlayerShipController::FrameChanged(Frame *newFrame, bool autoadjustSpeed = true) {
 	if (autoadjustSpeed && m_setSpeedTarget == NULL) {
 		vector3d shipVel = m_ship->GetVelocity();
-		m_setSpeed = std::max(shipVel.Dot(-m_ship->GetOrient().VectorZ()), 0.0);
+		m_currentSetSpeed = std::max(shipVel.Dot(-m_ship->GetOrient().VectorZ()), 0.0);
 	}
+	m_speedLocked = true;
 	m_lastFrame = newFrame;
 }
 
@@ -358,9 +378,10 @@ void PlayerShipController::SetFlightControlState(FlightControlState s)
 				m_ship->GetVelocity();
 
 			// A change from Manual to Set Speed never sets a negative speed.
-			m_setSpeed = std::max(shipVel.Dot(-m_ship->GetOrient().VectorZ()), 0.0);
+			m_setSpeed = m_currentSetSpeed = std::max(shipVel.Dot(-m_ship->GetOrient().VectorZ()), 0.0);
 			// notify flight control that our frame of reference has changed (hah!), but don't adjust our flight details as we've already set those up.
 			FrameChanged(m_ship->GetFrame(), false);
+			m_speedLocked = false;
 		}
 		//XXX global stuff
 		Pi::onPlayerChangeFlightControlState.emit();
@@ -407,6 +428,24 @@ Body *PlayerShipController::GetSetSpeedTarget() const
 {
 	return m_setSpeedTarget;
 }
+
+void PlayerShipController::SetSpeedTarget(Body* const target) {
+	vector3d goalVelocity = -m_ship->GetOrient().VectorZ() * m_currentSetSpeed;
+
+		double _vel = 0;
+	const char *rel_to = 0;
+	const Body *set_speed_target = Pi::player->GetSetSpeedTarget();
+	if (set_speed_target) {
+		rel_to = set_speed_target->GetLabel().c_str();
+		_vel = Pi::player->GetVelocityRelTo(set_speed_target).Length();
+	}
+	else {
+		rel_to = Pi::player->GetFrame()->GetLabel().c_str();
+		_vel = vel.Length();
+	}
+
+}
+
 
 void PlayerShipController::SetCombatTarget(Body* const target, bool setSpeedTo)
 {
