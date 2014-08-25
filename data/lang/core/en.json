@@ -107,6 +107,26 @@
       "description" : "",
       "message" : "Axial tilt"
    },
+   "AXIS_SPEED" : {
+      "description": "Set speed mode set speed",
+      "message" : "Set Speed"
+   },
+   "AXIS_SPEED_SCALE" : {
+      "description": "Set scale for set speed",
+      "message" : "Set Speed Scale"
+   },
+   "AXIS_THRUST_RIGHT" : {
+      "description": "Analogue Left/Right Thrust Axis",
+      "message": "Longitudinal Thrust Axis"
+   },
+   "AXIS_THRUST_FWD" : {
+      "description": "Analogue Forewards/Backwards Thrust Axis",
+      "message": "Fore/Aft Thrust Axis"
+   },
+   "AXIS_THRUST_UP" : {
+      "description": "Analogue Up/Down Thrust Axis",
+      "message": "Lateral Thrust Axis"
+   },
    "A_FEW_THOUSAND" : {
       "description" : "",
       "message" : "Only a few thousand"

@@ -57,16 +57,18 @@ KEY_BINDING(toggleLuaConsole, "BindToggleLuaConsole", Lang::TOGGLE_LUA_CONSOLE, 
 KEY_BINDING(toggleRotationDamping, "BindToggleRotationDamping", Lang::TOGGLE_ROTATION_DAMPING, SDLK_r, 0)
 
 BINDING_GROUP(Lang::JOYSTICK_INPUT)
-AXIS_BINDING(pitchAxis, "BindAxisPitch", Lang::PITCH, "-Joy0Axis1")
-AXIS_BINDING(rollAxis, "BindAxisRoll", Lang::ROLL, "Joy0Axis2")
-AXIS_BINDING(yawAxis, "BindAxisYaw", Lang::YAW, "Joy0Axis0")
+AXIS_BINDING(pitchAxis, "BindAxisPitch", Lang::PITCH, "")
+AXIS_BINDING(rollAxis, "BindAxisRoll", Lang::ROLL, "")
+AXIS_BINDING(yawAxis, "BindAxisYaw", Lang::YAW, "")
+AXIS_BINDING(thrustRightAxis, "BindAxisThrustRight", Lang::AXIS_THRUST_RIGHT, "")
+AXIS_BINDING(thrustUpAxis, "BindAxisThrustUp", Lang::AXIS_THRUST_UP, "")
+AXIS_BINDING(thrustForwardAxis, "BindAxisThrustForward", Lang::AXIS_THRUST_FWD, "")
+AXIS_BINDING(speedAxis, "BindAxisSpeed", Lang::AXIS_SPEED, "")
+AXIS_BINDING(speedScaleAxis, "BindAxisSpeedScale", Lang::AXIS_SPEED_SCALE, "")
 
 BINDING_PAGE_END()
 
 // not yet implemented/used
-// AXIS_BINDING(thrustRightAxis, "BindAxisThrustRight", , DEFAULT_BINDING)
-// AXIS_BINDING(thrustUpAxis, "BindAxisThrustUp", , DEFAULT_BINDING)
-// AXIS_BINDING(thrustForwardAxis, "BindAxisThrustForward", , DEFAULT_BINDING)
 
 BINDING_PAGE(VIEW)
 
