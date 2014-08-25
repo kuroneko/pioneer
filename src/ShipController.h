@@ -65,6 +65,7 @@ public:
 	double GetSetSpeed() const { return m_setSpeed; }
 	double GetSpeedScale() const { return m_speedScale;	}
 	bool IsUsingSpeedScale() const { return m_usingSpeedScale; }
+	bool IsSpeedLocked() const { return m_speedLocked; }
 	FlightControlState GetFlightControlState() const { return m_flightControlState; }
 	vector3d GetMouseDir() const { return m_mouseDir; }
 	void SetMouseForRearView(bool enable) { m_invertMouse = enable; }
@@ -84,7 +85,8 @@ public:
 	Body *GetSetSpeedTarget() const;
 	void SetCombatTarget(Body* const target, bool setSpeedTo = false);
 	void SetNavTarget(Body* const target, bool setSpeedTo = false);
-
+	void PlayerShipController::SetSpeedTarget(Body* const target);
+	
 	sigc::signal<void> onRotationDampingChanged;
 
 private:
@@ -99,10 +101,12 @@ private:
 	bool m_invertMouse; // used for rear view, *not* for invert Y-axis option (which is Pi::IsMouseYInvert)
 	bool m_mouseActive;
 	bool m_rotationDamping;
+	bool m_speedLocked; // if true, decouple m_setSpeed from the actual set speed.
 	double m_mouseX;
 	double m_mouseY;
 	double m_setSpeed;
 	double m_speedScale;
+	double m_currentSetSpeed;
 	FlightControlState m_flightControlState;
 	float m_fovY; //for mouse acceleration adjustment
 	float m_joystickDeadzone;
@@ -112,6 +116,9 @@ private:
 	int m_setSpeedTargetIndex;
 	vector3d m_mouseDir;
 	bool m_usingSpeedScale; // for feedback to the HUD - do we need to report speed scaling factor for throttle use.
+
+	// control debounce
+	bool db_releaseSpeedLock;
 
 	sigc::connection m_connRotationDampingToggleKey;
 	sigc::connection m_fireMissileKey;
