@@ -601,10 +601,24 @@ void WorldView::RefreshButtonStateAndVisibility()
 				case CONTROL_FIXSPEED: {
 					std::string msg;
 					const double setspeed = Pi::player->GetPlayerController()->GetSetSpeed();
-					if (setspeed > 1000) {
-						msg = stringf(Lang::SET_SPEED_KM_S, formatarg("speed", setspeed*0.001));
-					} else {
-						msg = stringf(Lang::SET_SPEED_M_S, formatarg("speed", setspeed));
+					if (Pi::player->GetPlayerController()->IsUsingSpeedScale()) {
+						const double speedscale = Pi::player->GetPlayerController()->GetSpeedScale();
+						if (speedscale > 1000) {
+							msg = stringf(Lang::SET_SPEED_KM_S_SCALED, 
+								formatarg("speed", setspeed*0.001), 
+								formatarg("speedscale", speedscale*0.001));
+						} else {
+							msg = stringf(Lang::SET_SPEED_M_S_SCALED, 
+								formatarg("speed", setspeed),
+								formatarg("speedscale", speedscale));
+						}
+					}
+					else {
+						if (setspeed > 1000) {
+							msg = stringf(Lang::SET_SPEED_KM_S, formatarg("speed", setspeed*0.001));
+						} else {
+							msg = stringf(Lang::SET_SPEED_M_S, formatarg("speed", setspeed));
+						}
 					}
 					m_flightStatus->SetText(msg);
 					break;

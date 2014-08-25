@@ -63,6 +63,8 @@ public:
 	void PollControls(float timeStep, const bool force_rotation_damping, int *mouseMotion);
 	bool IsMouseActive() const { return m_mouseActive; }
 	double GetSetSpeed() const { return m_setSpeed; }
+	double GetSpeedScale() const { return m_speedScale;	}
+	bool IsUsingSpeedScale() const { return m_usingSpeedScale; }
 	FlightControlState GetFlightControlState() const { return m_flightControlState; }
 	vector3d GetMouseDir() const { return m_mouseDir; }
 	void SetMouseForRearView(bool enable) { m_invertMouse = enable; }
@@ -100,6 +102,7 @@ private:
 	double m_mouseX;
 	double m_mouseY;
 	double m_setSpeed;
+	double m_speedScale;
 	FlightControlState m_flightControlState;
 	float m_fovY; //for mouse acceleration adjustment
 	float m_joystickDeadzone;
@@ -108,6 +111,7 @@ private:
 	int m_navTargetIndex;
 	int m_setSpeedTargetIndex;
 	vector3d m_mouseDir;
+	bool m_usingSpeedScale; // for feedback to the HUD - do we need to report speed scaling factor for throttle use.
 
 	sigc::connection m_connRotationDampingToggleKey;
 	sigc::connection m_fireMissileKey;

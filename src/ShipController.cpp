@@ -31,9 +31,11 @@ PlayerShipController::PlayerShipController() :
 	m_mouseX(0.0),
 	m_mouseY(0.0),
 	m_setSpeed(0.0),
+	m_speedScale(200.0f),
 	m_flightControlState(CONTROL_MANUAL),
 	m_lowThrustPower(0.25), // note: overridden by the default value in GameConfig.cpp (DefaultLowThrustPower setting)
-	m_mouseDir(0.0)
+	m_mouseDir(0.0),
+	m_usingSpeedScale(false)
 {
 	float deadzone = Pi::config->Float("JoystickDeadzone");
 	m_joystickDeadzone = deadzone * deadzone;
@@ -237,24 +239,72 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 		else m_mouseActive = false;
 
 		if (m_flightControlState == CONTROL_FIXSPEED) {
-			double oldSpeed = m_setSpeed;
-			if (stickySpeedKey) {
-				if (!(KeyBindings::increaseSpeed.IsActive() || KeyBindings::decreaseSpeed.IsActive())) {
-					stickySpeedKey = false;
-				}
-			}
+			if (KeyBindings::speedAxis.Enabled()) {
 
-			if (!stickySpeedKey) {
-				if (KeyBindings::increaseSpeed.IsActive())
-					m_setSpeed += std::max(fabs(m_setSpeed)*0.05, 1.0);
-				if (KeyBindings::decreaseSpeed.IsActive())
-					m_setSpeed -= std::max(fabs(m_setSpeed)*0.05, 1.0);
-				if ( ((oldSpeed < 0.0) && (m_setSpeed >= 0.0)) ||
-						((oldSpeed > 0.0) && (m_setSpeed <= 0.0)) ) {
-					// flipped from going forward to backwards. make the speed 'stick' at zero
-					// until the player lets go of the key and presses it again
-					stickySpeedKey = true;
-					m_setSpeed = 0;
+				if (KeyBindings::speedScaleAxis.Enabled()) {
+					double speedScale = 2.0;
+
+					m_usingSpeedScale = true;
+					// the speed scale axis let's us set the throttle scale from the 
+					// very reasonable scale of 2x10^1 ms^1, to the very fast 2x10^5 ms^1.
+					//
+					// invert the scale off the bat so it operates in the expected direction!
+					double axisValue = -KeyBindings::speedScaleAxis.GetValue();
+					// offset so we're dealing with 0.0 -> 2.0
+					axisValue += 1.0f;
+					// and clamp
+					if (axisValue < 0.0f) {
+						axisValue = 0.0f;
+					} else if (axisValue > 2.0f) {
+						axisValue = 2.0f;
+					}
+					// now, rescale to our maximum permitted scale
+					speedScale = (axisValue * 5.0f / 2.0f) + 1.0f;
+					// and clip to clean powers
+					speedScale = std::round(speedScale);
+
+					// compute the maximum permitted speed in this mode
+					m_speedScale = 2.0f * std::pow(10.0, speedScale);
+				}
+				else {
+					m_usingSpeedScale = false;
+					m_speedScale = 200.0f;
+				}
+
+				// get the speed axis value
+				// invert the scale off the bat so it operates in the expected direction!
+				double spdAxisValue = -KeyBindings::speedAxis.GetValue();
+				// offset so we're dealing with 0.0 -> 2.0
+				spdAxisValue += 1.0f;
+				// and clamp
+				if (spdAxisValue < 0.0f) {
+					spdAxisValue = 0.0f;
+				} else if (spdAxisValue > 2.0f) {
+					spdAxisValue = 2.0f;
+				}
+				// now, rescale to our maximum permitted scale and set.
+				m_setSpeed = spdAxisValue * m_speedScale / 2.0;
+			} else {
+				double oldSpeed = m_setSpeed;
+
+				if (stickySpeedKey) {
+					if (!(KeyBindings::increaseSpeed.IsActive() || KeyBindings::decreaseSpeed.IsActive())) {
+						stickySpeedKey = false;
+					}
+				}
+
+				if (!stickySpeedKey) {
+					if (KeyBindings::increaseSpeed.IsActive())
+						m_setSpeed += std::max(fabs(m_setSpeed)*0.05, 1.0);
+					if (KeyBindings::decreaseSpeed.IsActive())
+						m_setSpeed -= std::max(fabs(m_setSpeed)*0.05, 1.0);
+					if (((oldSpeed < 0.0) && (m_setSpeed >= 0.0)) ||
+						((oldSpeed > 0.0) && (m_setSpeed <= 0.0))) {
+						// flipped from going forward to backwards. make the speed 'stick' at zero
+						// until the player lets go of the key and presses it again
+						stickySpeedKey = true;
+						m_setSpeed = 0;
+					}
 				}
 			}
 		}
