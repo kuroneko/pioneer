@@ -707,6 +707,15 @@ void Pi::OnChangeDetailLevel()
 	BaseSphere::OnChangeDetailLevel();
 }
 
+// rescale the (joystick) value to fit within the range of -1.0 to 1.0
+static inline float ScaleAxis(int value) {
+	if (value == -32768)
+		return 1.f;
+	else
+		return -value / 32767.f;
+}
+
+
 void Pi::HandleEvents()
 {
 	PROFILE_SCOPED()
@@ -934,10 +943,7 @@ void Pi::HandleEvents()
 			case SDL_JOYAXISMOTION:
 				if (!joysticks[event.jaxis.which].joystick)
 					break;
-				if (event.jaxis.value == -32768)
-					joysticks[event.jaxis.which].axes[event.jaxis.axis] = 1.f;
-				else
-					joysticks[event.jaxis.which].axes[event.jaxis.axis] = -event.jaxis.value / 32767.f;
+				joysticks[event.jaxis.which].axes[event.jaxis.axis] = ScaleAxis(event.jaxis.value);
 				break;
 			case SDL_JOYBUTTONUP:
 			case SDL_JOYBUTTONDOWN:
@@ -992,9 +998,17 @@ void Pi::InitGame()
 	std::fill(mouseMotion, mouseMotion + COUNTOF(mouseMotion), 0);
 	for (std::map<SDL_JoystickID,JoystickState>::iterator stick = joysticks.begin(); stick != joysticks.end(); ++stick) {
 		JoystickState &state = stick->second;
-		std::fill(state.buttons.begin(), state.buttons.end(), false);
+
+		// seed with button states.
+		for (int idx = 0; idx < state.buttons.size(); idx++) {
+			state.buttons[idx] = SDL_JoystickGetButton(state.joystick, idx);
+		}
+		// hats should always be center-by-default at least...
 		std::fill(state.hats.begin(), state.hats.end(), 0);
-		std::fill(state.axes.begin(), state.axes.end(), 0.f);
+		// and seed all the axises since not all axises will centre in the middle.
+		for (int idx = 0; idx < state.axes.size(); idx++) {
+			state.axes[idx] = ScaleAxis(SDL_JoystickGetAxis(state.joystick, idx));
+		}
 	}
 
 	if (!config->Int("DisableSound")) AmbientSounds::Init();
