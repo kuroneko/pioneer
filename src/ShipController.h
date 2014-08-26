@@ -91,6 +91,7 @@ public:
 private:
 	bool IsAnyAngularThrusterKeyDown();
 	bool IsAnyLinearThrusterKeyDown();
+	bool IsUsingDirectSpeedControl();
 	//do a variety of checks to see if input is allowed
 	void CheckControlsLock();
 	void FrameChanged(Frame *newFrame, bool autoadjustSpeed);

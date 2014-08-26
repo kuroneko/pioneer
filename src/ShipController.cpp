@@ -279,7 +279,7 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 			} else {
 				db_releaseSpeedLock = false;
 			}
-			if (!m_speedLocked) {
+			if (!IsUsingDirectSpeedControl() || !m_speedLocked) {
 				m_currentSetSpeed = m_setSpeed;
 			}
 		}
@@ -363,8 +363,12 @@ void PlayerShipController::FrameChanged(Frame *newFrame, bool autoadjustSpeed = 
 	if (autoadjustSpeed && m_setSpeedTarget == NULL) {
 		vector3d shipVel = m_ship->GetVelocity();
 		m_currentSetSpeed = std::max(shipVel.Dot(-m_ship->GetOrient().VectorZ()), 0.0);
+		if (IsUsingDirectSpeedControl()) {
+			m_speedLocked = true;
+		} else {
+			m_setSpeed = m_currentSetSpeed;
+		}
 	}
-	m_speedLocked = true;
 	m_lastFrame = newFrame;
 }
 
@@ -451,4 +455,9 @@ void PlayerShipController::SetNavTarget(Body* const target, bool setSpeedTo)
 	else if (m_setSpeedTarget == m_navTarget)
 		m_setSpeedTarget = 0;
 	m_navTarget = target;
+}
+
+bool PlayerShipController::IsUsingDirectSpeedControl() 
+{
+	return false;
 }
