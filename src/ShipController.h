@@ -64,11 +64,9 @@ public:
 	void PollControls(float timeStep, const bool force_rotation_damping, int *mouseMotion);
 	bool IsMouseActive() const { return m_mouseActive; }
 	double GetSetSpeed() const { return m_setSpeed; }
-<<<<<<< HEAD
+	double GetCurrentSetSpeed() const { return m_currentSetSpeed; }
 	double GetSpeedScale() const { return m_speedScale;	}
 	bool IsUsingSpeedScale() const { return m_usingSpeedScale; }
-=======
->>>>>>> fix-flight-assistance
 	bool IsSpeedLocked() const { return m_speedLocked; }
 	FlightControlState GetFlightControlState() const { return m_flightControlState; }
 	vector3d GetMouseDir() const { return m_mouseDir; }
@@ -89,8 +87,7 @@ public:
 	Body *GetSetSpeedTarget() const;
 	void SetCombatTarget(Body* const target, bool setSpeedTo = false);
 	void SetNavTarget(Body* const target, bool setSpeedTo = false);
-	void PlayerShipController::SetSpeedTarget(Body* const target);
-	
+
 	sigc::signal<void> onRotationDampingChanged;
 
 private:

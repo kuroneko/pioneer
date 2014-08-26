@@ -501,24 +501,6 @@ Body *PlayerShipController::GetSetSpeedTarget() const
 	return m_setSpeedTarget;
 }
 
-void PlayerShipController::SetSpeedTarget(Body* const target) {
-	vector3d goalVelocity = -m_ship->GetOrient().VectorZ() * m_currentSetSpeed;
-
-		double _vel = 0;
-	const char *rel_to = 0;
-	const Body *set_speed_target = Pi::player->GetSetSpeedTarget();
-	if (set_speed_target) {
-		rel_to = set_speed_target->GetLabel().c_str();
-		_vel = Pi::player->GetVelocityRelTo(set_speed_target).Length();
-	}
-	else {
-		rel_to = Pi::player->GetFrame()->GetLabel().c_str();
-		_vel = vel.Length();
-	}
-
-}
-
-
 void PlayerShipController::SetCombatTarget(Body* const target, bool setSpeedTo)
 {
 	if (setSpeedTo)
@@ -539,5 +521,5 @@ void PlayerShipController::SetNavTarget(Body* const target, bool setSpeedTo)
 
 bool PlayerShipController::IsUsingDirectSpeedControl() 
 {
-	return false;
+	return KeyBindings::speedAxis.Enabled();
 }

@@ -600,26 +600,52 @@ void WorldView::RefreshButtonStateAndVisibility()
 
 				case CONTROL_FIXSPEED: {
 					std::string msg;
-					const double setspeed = Pi::player->GetPlayerController()->GetSetSpeed();
-					if (Pi::player->GetPlayerController()->IsUsingSpeedScale()) {
-						const double speedscale = Pi::player->GetPlayerController()->GetSpeedScale();
-						if (speedscale > 1000) {
-							msg = stringf(Lang::SET_SPEED_KM_S_SCALED, 
-								formatarg("speed", setspeed*0.001), 
-								formatarg("speedscale", speedscale*0.001));
+					double setspeed = Pi::player->GetPlayerController()->GetSetSpeed();
+					double lockedspeed = Pi::player->GetPlayerController()->GetCurrentSetSpeed();
+					double speedscale = Pi::player->GetPlayerController()->GetSpeedScale();
+					const bool isUsingScale = Pi::player->GetPlayerController()->IsUsingSpeedScale();
+
+					const char *SpeedLabel = Lang::SET_SPEED_M_S;
+
+					if (Pi::player->GetPlayerController()->IsSpeedLocked()) {
+						if (lockedspeed > 1000 || setspeed > 1000 || speedscale > 1000) {
+							if (isUsingScale) {
+								SpeedLabel = Lang::SET_SPEED_LOCKED_KM_S_SCALED;
+							} else {
+								SpeedLabel = Lang::SET_SPEED_LOCKED_KM_S;
+							}
+							speedscale *= 0.001;
+							setspeed *= 0.001;
+							lockedspeed *= 0.001;
 						} else {
-							msg = stringf(Lang::SET_SPEED_M_S_SCALED, 
+							if (isUsingScale) {
+								SpeedLabel = Lang::SET_SPEED_LOCKED_M_S_SCALED;
+							} else {
+								SpeedLabel = Lang::SET_SPEED_LOCKED_M_S;
+							}
+						}
+					} else {
+						if (setspeed > 1000 || speedscale > 1000) {
+							if (isUsingScale) {
+								SpeedLabel = Lang::SET_SPEED_KM_S_SCALED;
+							} else {
+								SpeedLabel = Lang::SET_SPEED_KM_S;
+							}
+							speedscale *= 0.001;
+							setspeed *= 0.001;
+							lockedspeed *= 0.001;
+						} else {
+							if (isUsingScale) {
+								SpeedLabel = Lang::SET_SPEED_M_S_SCALED;
+							} else {
+								SpeedLabel = Lang::SET_SPEED_M_S;
+							}
+						}
+					}
+					msg = stringf(SpeedLabel,
+								formatarg("lockedspeed", lockedspeed),
 								formatarg("speed", setspeed),
 								formatarg("speedscale", speedscale));
-						}
-					}
-					else {
-						if (setspeed > 1000) {
-							msg = stringf(Lang::SET_SPEED_KM_S, formatarg("speed", setspeed*0.001));
-						} else {
-							msg = stringf(Lang::SET_SPEED_M_S, formatarg("speed", setspeed));
-						}
-					}
 					m_flightStatus->SetText(msg);
 					break;
 				}

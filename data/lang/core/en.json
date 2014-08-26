@@ -1551,6 +1551,14 @@
       "description" : "",
       "message" : "Set speed: %speed{f.2}/%speedscale{f.2} km/s"
    },
+   "SET_SPEED_LOCKED_KM_S" : {
+      "description" : "",
+      "message" : "Locked: %lockedspeed{f.2} km/s Set: %speed{f.2} km/s"
+   },
+   "SET_SPEED_LOCKED_KM_S_SCALED" : {
+      "description" : "",
+      "message" : "Locked: %lockedspeed{f.2} km/s Set %speed{f.2}/%speedscale{f.2} km/s"
+   },
    "SET_SPEED_M_S" : {
       "description" : "",
       "message" : "Set speed: %speed{f.0} m/s"
@@ -1558,6 +1566,14 @@
    "SET_SPEED_M_S_SCALED" : {
       "description" : "",
       "message" : "Set speed: %speed{f.0}/%speedscale{f.0} m/s"
+   },
+   "SET_SPEED_LOCKED_M_S" : {
+      "description" : "",
+      "message" : "Locked: %lockedspeed{f.0} m/s Set: %speed{f.0} m/s"
+   },
+   "SET_SPEED_LOCKED_M_S_SCALED" : {
+      "description" : "",
+      "message" : "Locked: %lockedspeed{f.0} m/s Set: %speed{f.0}/%speedscale{f.0} m/s"
    },
    "SHIELD_ENERGY_BOOSTER" : {
       "description" : "",
