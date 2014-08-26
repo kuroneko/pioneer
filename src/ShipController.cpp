@@ -334,6 +334,14 @@ bool PlayerShipController::IsAnyLinearThrusterKeyDown()
 	);
 }
 
+void PlayerShipController::FrameChanged(Frame *newFrame, bool autoadjustSpeed = true) {
+	if (autoadjustSpeed && m_setSpeedTarget == NULL) {
+		vector3d shipVel = m_ship->GetVelocity();
+		m_setSpeed = std::max(shipVel.Dot(-m_ship->GetOrient().VectorZ()), 0.0);
+	}
+	m_lastFrame = newFrame;
+}
+
 void PlayerShipController::SetFlightControlState(FlightControlState s)
 {
 	if (m_flightControlState != s) {
@@ -351,6 +359,8 @@ void PlayerShipController::SetFlightControlState(FlightControlState s)
 
 			// A change from Manual to Set Speed never sets a negative speed.
 			m_setSpeed = std::max(shipVel.Dot(-m_ship->GetOrient().VectorZ()), 0.0);
+			// notify flight control that our frame of reference has changed (hah!), but don't adjust our flight details as we've already set those up.
+			FrameChanged(m_ship->GetFrame(), false);
 		}
 		//XXX global stuff
 		Pi::onPlayerChangeFlightControlState.emit();

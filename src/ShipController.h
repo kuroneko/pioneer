@@ -12,6 +12,7 @@
 
 class Ship;
 class Space;
+class Frame;
 
 enum FlightControlState {
 	CONTROL_MANUAL,
@@ -90,6 +91,7 @@ private:
 	bool IsAnyLinearThrusterKeyDown();
 	//do a variety of checks to see if input is allowed
 	void CheckControlsLock();
+	void FrameChanged(Frame *newFrame, bool autoadjustSpeed);
 	Body* m_combatTarget;
 	Body* m_navTarget;
 	Body* m_setSpeedTarget;
@@ -108,6 +110,7 @@ private:
 	int m_navTargetIndex;
 	int m_setSpeedTargetIndex;
 	vector3d m_mouseDir;
+	Frame *m_lastFrame;
 
 	sigc::connection m_connRotationDampingToggleKey;
 	sigc::connection m_fireMissileKey;
