@@ -12,6 +12,7 @@
 
 class Ship;
 class Space;
+class Frame;
 
 enum FlightControlState {
 	CONTROL_MANUAL,
@@ -63,8 +64,11 @@ public:
 	void PollControls(float timeStep, const bool force_rotation_damping, int *mouseMotion);
 	bool IsMouseActive() const { return m_mouseActive; }
 	double GetSetSpeed() const { return m_setSpeed; }
+<<<<<<< HEAD
 	double GetSpeedScale() const { return m_speedScale;	}
 	bool IsUsingSpeedScale() const { return m_usingSpeedScale; }
+=======
+>>>>>>> fix-flight-assistance
 	bool IsSpeedLocked() const { return m_speedLocked; }
 	FlightControlState GetFlightControlState() const { return m_flightControlState; }
 	vector3d GetMouseDir() const { return m_mouseDir; }
@@ -92,8 +96,10 @@ public:
 private:
 	bool IsAnyAngularThrusterKeyDown();
 	bool IsAnyLinearThrusterKeyDown();
+	bool IsUsingDirectSpeedControl();
 	//do a variety of checks to see if input is allowed
 	void CheckControlsLock();
+	void FrameChanged(Frame *newFrame, bool autoadjustSpeed);
 	Body* m_combatTarget;
 	Body* m_navTarget;
 	Body* m_setSpeedTarget;
@@ -116,6 +122,7 @@ private:
 	int m_setSpeedTargetIndex;
 	vector3d m_mouseDir;
 	bool m_usingSpeedScale; // for feedback to the HUD - do we need to report speed scaling factor for throttle use.
+	Frame *m_lastFrame;
 
 	// control debounce
 	bool db_releaseSpeedLock;

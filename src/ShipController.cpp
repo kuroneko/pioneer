@@ -116,13 +116,18 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 	}
 
 	if (m_ship->GetFlightState() == Ship::FLYING) {
+		Frame *shipFrame = NULL;
 		switch (m_flightControlState) {
 		case CONTROL_FIXSPEED:
 			PollControls(timeStep, true, mouseMotion);
 			if (IsAnyLinearThrusterKeyDown()) break;
+			shipFrame = m_ship->GetFrame();
+			if (shipFrame != m_lastFrame) {
+				FrameChanged(shipFrame, true);
+			}
 			v = -m_ship->GetOrient().VectorZ() * m_currentSetSpeed;
 			if (m_setSpeedTarget) {
-				v += m_setSpeedTarget->GetVelocityRelTo(m_ship->GetFrame());
+				v += m_setSpeedTarget->GetVelocityRelTo(shipFrame);
 			}
 			m_ship->AIMatchVel(v);
 			break;
@@ -167,7 +172,7 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 			else SetFlightControlState(CONTROL_MANUAL);
 			m_setSpeed = 0.0;
 			m_currentSetSpeed = 0.0;
-			m_speedLocked = true;
+			m_speedLocked = false;
 			break;
 		default: assert(0); break;
 		}
@@ -314,7 +319,6 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 						stickySpeedKey = false;
 					}
 				}
-
 				if (!stickySpeedKey) {
 					if (KeyBindings::increaseSpeed.IsActive())
 						m_setSpeed += std::max(fabs(m_setSpeed)*0.05, 1.0);
@@ -328,6 +332,17 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 						m_setSpeed = 0;
 					}
 				}
+			}
+			if (KeyBindings::releaseSpeedLock.IsActive()) {
+				if (!db_releaseSpeedLock) {
+					m_speedLocked = false;
+				}
+				db_releaseSpeedLock = true;
+			} else {
+				db_releaseSpeedLock = false;
+			}
+			if (!IsUsingDirectSpeedControl() || !m_speedLocked) {
+				m_currentSetSpeed = m_setSpeed;
 			}
 		}
 
@@ -406,6 +421,19 @@ bool PlayerShipController::IsAnyLinearThrusterKeyDown()
 	);
 }
 
+void PlayerShipController::FrameChanged(Frame *newFrame, bool autoadjustSpeed = true) {
+	if (autoadjustSpeed && m_setSpeedTarget == NULL) {
+		vector3d shipVel = m_ship->GetVelocity();
+		m_currentSetSpeed = std::max(shipVel.Dot(-m_ship->GetOrient().VectorZ()), 0.0);
+		if (IsUsingDirectSpeedControl()) {
+			m_speedLocked = true;
+		} else {
+			m_setSpeed = m_currentSetSpeed;
+		}
+	}
+	m_lastFrame = newFrame;
+}
+
 void PlayerShipController::SetFlightControlState(FlightControlState s)
 {
 	if (m_flightControlState != s) {
@@ -423,8 +451,9 @@ void PlayerShipController::SetFlightControlState(FlightControlState s)
 
 			// A change from Manual to Set Speed never sets a negative speed.
 			m_setSpeed = m_currentSetSpeed = std::max(shipVel.Dot(-m_ship->GetOrient().VectorZ()), 0.0);
-			// by default, lock the current speed and only release it when the pilot acknowledges the mode change
-			m_speedLocked = true;
+			// notify flight control that our frame of reference has changed (hah!), but don't adjust our flight details as we've already set those up.
+			FrameChanged(m_ship->GetFrame(), false);
+			m_speedLocked = false;
 		}
 		//XXX global stuff
 		Pi::onPlayerChangeFlightControlState.emit();
@@ -506,4 +535,9 @@ void PlayerShipController::SetNavTarget(Body* const target, bool setSpeedTo)
 	else if (m_setSpeedTarget == m_navTarget)
 		m_setSpeedTarget = 0;
 	m_navTarget = target;
+}
+
+bool PlayerShipController::IsUsingDirectSpeedControl() 
+{
+	return false;
 }
